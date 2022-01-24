@@ -1,0 +1,160 @@
+<!HTML doctype>
+<html>
+    <head>
+        <title> Verifica cpf </title>
+        <script>
+            window.onload = function (){
+                var btn_verif_cpf      =     document.querySelector("#btn_verif_cpf");
+                var textbox_cpf        =     document.querySelector(".textbox_cpf");
+                
+                // (!)---> função para mascarar o campo de digitação de cpf <---(!)
+                // (!)---> função 'colar' está disaabiltada <---(!)
+                textbox_cpf.addEventListener("paste", function(evento){
+                    evento.preventDefault();
+                }),
+                textbox_cpf.addEventListener("keydown", function(evento){
+                    var codigo       =   evento.keyCode;
+                    
+                    if ((codigo >= 96 && codigo <= 105) || (codigo == 8)){
+                        if (textbox_cpf.value.length == 3 || textbox_cpf.value.length == 7){
+                            textbox_cpf.value += ".";
+                        } else if (textbox_cpf.value.length == 11){
+                            textbox_cpf.value += "-";
+                        }
+                    } else{
+                        evento.preventDefault();
+                    }
+                });
+
+                
+                //--------------------------------------------------------------------------------------------------
+                //--------------------------------------------------------------------------------------------------
+                //--------------------------------------------------------------------------------------------------
+                
+                
+                // (!)---> verifica se o CPF é valido ou não <---(!)
+                btn_verif_cpf.addEventListener("click", function(){
+                    
+                    if (textbox_cpf.value.length == 14){
+                        var cpf           =       textbox_cpf.value.split("");
+                        var cpf_aux_1     =       [];
+                        var cpf_aux_2     =       [];
+                        var resul_1       =       0;
+                        var resul_2       =       0;
+                        var multiplicacao_cpf      =     10;
+                        var cont_repetidor_digito  =      0;
+                        
+                        //--> este loop recebe o array 'cpf', tira os '.' e os '-' e converte para inteiro. 
+                        for (i = 0; i < cpf.length; i++){
+                            if ((cpf[i] == ".") || (cpf[i] == "-")){
+                                cpf.splice(i, 1);
+                            }
+                            cpf[i] = parseInt(cpf[i]);
+                        }
+                        
+                        var dig_valid_1     =    cpf[9];
+                        var dig_valid_2     =    cpf[10];
+                        var validador_repetidor_digito  =  cpf[0];
+                        
+                        //--> erifica se os 11 digitos capturados estão com números repetidos como mostra o exemplo: (111.111.111-11 / 222.222.222-22...)
+                        for(i = 0; i < 11; i++){
+                            if (cpf[i] == validador_repetidor_digito){
+                                cont_repetidor_digito++;
+                            }
+                        }
+                        
+                        if (cont_repetidor_digito < 11){
+                            
+                            //--> este loop vai fazer a validação do primeiro digito depois do '-'
+                            for(i = 0; i < 9; i++){
+                                cpf_aux_1[i] = cpf[i] * multiplicacao_cpf;
+                                multiplicacao_cpf--;
+                            
+                                if (i == 8){
+                                    for (i = 0; i < 9; i++){
+                                        resul_1 = resul_1 + cpf_aux_1[i];
+                                    }
+                                
+                                    resul_1 = (resul_1 * 10) % 11;
+                                    multiplicacao_cpf = 11;
+                                
+                                    if (resul_1 == 10){
+                                        resul_1 = 0;
+                                    }
+                                
+                                }
+                            }
+                        
+                            //--> este loop vai fazer a validação do segundo digito depois do '-'
+                            for(i = 0; i < 10; i++){
+                                cpf_aux_2[i] = cpf[i] * multiplicacao_cpf;
+                                multiplicacao_cpf--;
+                            
+                                if (i == 9){
+                                    for (i = 0; i < 10; i++){
+                                        resul_2 = resul_2 + cpf_aux_2[i];
+                                    }
+                                
+                                    resul_2 = (resul_2 * 10) % 11;
+                                
+                                    if (resul_2 == 10){
+                                        resul_2 = 0;
+                                    }
+                                }
+                            }
+                            
+                            if ((dig_valid_1 == resul_1) && (dig_valid_2 == resul_2)){
+                                mostrarMsg(3);
+                            } else {
+                                mostrarMsg(4);
+                            }
+                            
+                        } else {
+                            mostrarMsg(2);
+                        }
+                        
+                    } else {
+                        mostrarMsg(1);
+                    }
+                });  
+            }
+            
+            
+            //--------------------------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------------------------------
+            
+            
+            function mostrarMsg(msg){
+                switch (msg){
+                    case 1:{
+                        this.msg = "(!) ---> CPF INCOMPLETO!, é necessário possuir 11 digitos <--- (!)";
+                        break;
+                    }
+                    
+                    case 2:{
+                        this.msg = "(!) ---> CPF INVÁLIDO!, cpf não pode possuir uma sequência repetidas de digitos <--- (!)";
+                        break;
+                    }
+                        
+                    case 3:{
+                        this.msg = "(OK) ---> CPF VALIDO! <--- (OK)";
+                        break;
+                    }
+                        
+                    case 4:{
+                        this.msg = "(!) ---> CPF INVÁLIDO! <--- (!)";
+                        break;
+                    }
+                }
+                
+                console.log(msg);
+                return window.alert(this.msg);
+            }
+        </script>
+    </head>
+    <body>
+        <input type = "text" class = "textbox_cpf" maxlength="14"/>
+        <button id = "btn_verif_cpf">verificar</button>
+    </body>
+</html>
